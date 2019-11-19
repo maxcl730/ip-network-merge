@@ -7,10 +7,6 @@ from IPy import IP
 #masks =  ["255.255.255.248", "255.255.255.240", "255.255.255.224", "255.255.255.192", "255.255.255.128", "255.255.255.0",
 #		  "255.255.248.0", "255.255.240.0", "255.255.224.0", "255.255.192.0", "255.255.128.0", "255.255.0.0", ]
 
-mask_end = 24
-mask_start = 29
-masks = [x for x in range(mask_end,mask_start+1)]
-masks.reverse()
 
 class IPAddrError(Exception):
 	def __init__(self,err_type=-1):
@@ -21,10 +17,21 @@ class IPAddrError(Exception):
 
 
 class IP_Range(object):
-	@classmethod
-	def lookup_ipaddress_info(cls, ip_address):
+	mask_start = 29
+	mask_end = 24
+
+	def __init__(self, mask_start = 29, mask_end = 24):
+		self.mask_start = mask_start
+		self.mask_end = mask_end
+		self.masks = [x for x in range(self.mask_end, self.mask_start+1)]
+		self.masks.reverse()
+
+	def lookup_ipaddress_info(self, ip_address):
 		print("Querying ip address for {}".format(ip_address))
-		return random.randint(10,13)
+		if ip_address == '1.119.1.40':
+			return 20
+		else:
+			return random.randint(10,10)
 		url = 'http://api.map.baidu.com/location/ip?ak=abDsBedrGw46lo1CyQuwZs9magjV5gSf&coor=&ip='+ ip_address
 		r = None
 		while r is None:
@@ -41,8 +48,7 @@ class IP_Range(object):
 		#data.pop('ip')
 		return result['address']
 
-	@classmethod
-	def check_ipaddr(cls, ip_address):
+	def check_ipaddr(self, ip_address):
 		try:
 			ip = IP(ip_address)
 		except ValueError:
@@ -51,12 +57,11 @@ class IP_Range(object):
 			raise IPAddrError(1)
 		return ip
 
-	@classmethod
-	def lookup_ip_range_info(cls, ip_address, mask):
+	def lookup_ip_range_info(self, ip_address, mask):
 		#ip地址取29位掩码的网络地址、广播地址
 		print("Querying network address for {}/{}".format(ip_address, mask))
 		try:
-			ip = cls.check_ipaddr(ip_address)
+			ip = self.check_ipaddr(ip_address)
 		except IPAddrError as e:
 			print(e.message)
 		net_address = ip.make_net(mask).strNormal()
@@ -69,8 +74,8 @@ class IP_Range(object):
 					   'ip_range_int_start': ip_range[0].int(),
 					   'ip_range_int_end': ip_range[-1].int(),
 					   'ip_range': ip_range.strNormal(3),
-					   'info': cls.lookup_ipaddress_info(ip_address),
-					   #'info': random.randint(10,13),
+					   'info': self.lookup_ipaddress_info(ip_address),
+					   'netmask': mask,
 					   'next_ip': next_ipaddr}
 		#pprint(ipaddr_info)
 		sleeptime = random.randint(3,8)/10
@@ -79,25 +84,26 @@ class IP_Range(object):
 		return ipaddr_info
 
 
-	@classmethod
-	def merge_network_address(cls, start_ip):
+	def merge_network_address(self, start_ip):
 		mask_step = 1
 		merge_steps = 2
-		ipaddr_info = cls.lookup_ip_range_info(start_ip, masks[0])
-		while mask_step < len(masks):
+		ipaddr_info = self.lookup_ip_range_info(start_ip, self.masks[0])
+		while mask_step < len(self.masks):
 			print("{}  {}".format(2**(mask_step-1), merge_steps))
 			for step in range(2**(mask_step-1), merge_steps):
 				#print("  {}".format(step))
 				next_ipaddr = ipaddr_info['next_ip']
-				next_ipaddr_info = cls.lookup_ip_range_info(next_ipaddr, masks[0])
+				next_ipaddr_info = self.lookup_ip_range_info(next_ipaddr, self.masks[0])
 				if ipaddr_info['info'] != next_ipaddr_info['info']:
 					# 查询结果不同则返回网段信息
-					yield ipaddr_info
-				ipaddr_info['info'] = next_ipaddr_info['info']
+					yield megerd_ipaddr_info
+					raise StopIteration
+				ipaddr_info = next_ipaddr_info
 			mask_step += 1
-			net_address = IP(ipaddr_info['ip_start']).make_net(masks[mask_step-1]).strNormal()
-			ipaddr_info = cls.lookup_ip_range_info(ipaddr_info['ip_start'], masks[mask_step-1])
-			pprint("Merge IP range, New network address: {} , {}".format(net_address, masks[mask_step-1]))
+			net_address = IP(ipaddr_info['ip_start']).make_net(self.masks[mask_step-1]).strNormal()
+			pprint("Merge IP range, New network address: {} , {}".format(net_address, self.masks[mask_step-1]))
+			ipaddr_info = self.lookup_ip_range_info(ipaddr_info['ip_start'], self.masks[mask_step-1])
+			megerd_ipaddr_info = ipaddr_info.copy()
 			#yield merge_steps
 			merge_steps = 2 ** mask_step
 		yield ipaddr_info
@@ -105,7 +111,8 @@ class IP_Range(object):
 
 if __name__ == '__main__':
 	start_ip = sys.argv[1]
-	ge = IP_Range.merge_network_address(start_ip)
+	ip_range = IP_Range(29, 24)
+	ge = ip_range.merge_network_address(start_ip)
 	try:
 		while True:
 			a1 = next(ge)
