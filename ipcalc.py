@@ -32,6 +32,9 @@ class IP_Range(object):
 			return 20
 		else:
 			return random.randint(10,10)
+		sleeptime = random.randint(3,8)/10
+		print("Sleep {}s".format(sleeptime))
+		time.sleep(sleeptime)
 		url = 'http://api.map.baidu.com/location/ip?ak=abDsBedrGw46lo1CyQuwZs9magjV5gSf&coor=&ip='+ ip_address
 		r = None
 		while r is None:
@@ -53,8 +56,8 @@ class IP_Range(object):
 			ip = IP(ip_address)
 		except ValueError:
 			raise IPAddrError(-1)
-		if ip.iptype() == 'PRIVATE':
-			raise IPAddrError(1)
+		#if ip.iptype() == 'PRIVATE':
+		#	raise IPAddrError(1)
 		return ip
 
 	def lookup_ip_range_info(self, ip_address, mask):
@@ -74,13 +77,10 @@ class IP_Range(object):
 					   'ip_range_int_start': ip_range[0].int(),
 					   'ip_range_int_end': ip_range[-1].int(),
 					   'ip_range': ip_range.strNormal(3),
-					   'info': self.lookup_ipaddress_info(ip_address),
+					   'info':  'PRIVATE' if ip.iptype() == 'PRIVATE' else self.lookup_ipaddress_info(ip_address),
 					   'netmask': mask,
 					   'next_ip': next_ipaddr}
 		#pprint(ipaddr_info)
-		sleeptime = random.randint(3,8)/10
-		print("Sleep {}s".format(sleeptime))
-		time.sleep(sleeptime)
 		return ipaddr_info
 
 
