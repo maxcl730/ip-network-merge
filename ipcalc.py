@@ -39,11 +39,11 @@ class IPAddrInfo():
 		if result['status'] != 0:
 			return False
 		#data.pop('ip')
-		return result['address']
+		return str(result['address'])
 
 	@classmethod
 	def from_aliyun(cls, ip_address):
-		sleeptime = 1 + random.randint(3,5)/10
+		sleeptime = 1 + random.randint(3,8)/10
 		print("Sleep {}s".format(sleeptime))
 		time.sleep(sleeptime)
 		url = 'http://ip.aliyun.com/service/getIpInfo.php?ip=' + ip_address
@@ -61,12 +61,12 @@ class IPAddrInfo():
 			return False
 		data = result['data']
 		data.pop('ip')
-		return result['data']
+		return str(data)
 
 
 class IP_Range(object):
 	mask_start = 29
-	mask_end = 24
+	mask_end = 16
 
 	def __init__(self, mask_start = 29, mask_end = 24):
 		self.mask_start = mask_start
@@ -76,11 +76,11 @@ class IP_Range(object):
 
 	def lookup_ipaddress_info(self, ip_address):
 		print("Querying ip address for {}".format(ip_address))
-		return str(random.randint(10,10))
+		#return str(random.randint(10,10))
 
 		#info = IPAddrInfo.from_baidu(ip_address)
 		info = IPAddrInfo.from_aliyun(ip_address)
-		pprint(info)
+		#pprint(info)
 		return info
 
 	def check_ipaddr(self, ip_address):
@@ -156,9 +156,9 @@ if __name__ == '__main__':
 				a1 = next(ge)
 				start_ip = a1['next_ip']
 		except StopIteration:
-			pprint(a1)
-			msg = a1['ip_range'] + ',' + str(a1['netmask']) + ',' + str(a1['ip_range_int_end']) + ',' + str(a1['ip_range_int_start']) + ',' + a1['info']
-			pprint(msg)
+			#pprint(a1)
+			msg = a1['ip_range'] + '\t' + str(a1['netmask']) + '\t' + str(a1['ip_range_int_end']) + '\t' + str(a1['ip_range_int_start']) + '\t' + a1['info']
+			print(msg)
 			fi.write(msg + os.linesep)
 			fi.flush()
 			ge = ip_range.merge_network_address(start_ip)
