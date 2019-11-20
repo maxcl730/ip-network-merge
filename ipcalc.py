@@ -142,20 +142,20 @@ class IP_Range(object):
 				print(next_ipaddr + " in " + megerd_ipaddr_info['network_address'] + '/' + str(self.masks[mask_step]))
 				if IP(megerd_ipaddr_info['network_address']).int() % 2**(32-self.masks[mask_step]) != 0:
 					# 如遇跨网段则返回，重新开始合并
-					print("AAAA")
+					print("Network address is illegal, cannot continue merge!")
 					yield megerd_ipaddr_info
 					raise StopIteration
 				if next_ipaddr in IP(megerd_ipaddr_info['network_address'] + '/' + str(self.masks[mask_step])):
 					next_ipaddr_info = self.lookup_ip_range_info(next_ipaddr, self.masks[0])
 					if ipaddr_info['info'] != next_ipaddr_info['info']:
 						# 查询结果不同则返回网段信息
-						print('BBBB')
+						print("New IP address information.")
 						yield megerd_ipaddr_info
 						raise StopIteration
 					ipaddr_info = next_ipaddr_info
 				else:
 					# 如遇跨网段则返回，重新开始合并
-					print('CCCC')
+					print("IP address cannot marge into Network address!")
 					yield megerd_ipaddr_info
 					raise StopIteration
 			mask_step += 1
@@ -165,7 +165,7 @@ class IP_Range(object):
 			megerd_ipaddr_info = ipaddr_info.copy()
 			#yield merge_steps
 			merge_steps = 2 ** mask_step
-		print('DDDD')
+		print("Finished!")
 		yield megerd_ipaddr_info
 
 
