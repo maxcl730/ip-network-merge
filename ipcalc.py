@@ -66,8 +66,8 @@ class IPAddrInfo():
 
 
 class IP_Range(object):
-	mask_start = 29
-	mask_end = 16
+	mask_start = 0
+	mask_end = 0
 
 	def __init__(self, mask_start = 29, mask_end = 24):
 		self.mask_start = mask_start
@@ -77,7 +77,7 @@ class IP_Range(object):
 
 	def lookup_ipaddress_info(self, ip_address):
 		print("Querying ip address for {}".format(ip_address))
-		#return str(random.randint(10,10))
+		#return str('IP address information')
 		info = False
 		while not info:
 			#info = IPAddrInfo.from_baidu(ip_address)
@@ -150,7 +150,7 @@ if __name__ == '__main__':
 	stop_ip = sys.argv[2]
 
 	fi = open('./iprange.txt', 'a+')
-	ip_range = IP_Range(mask_start=29, mask_end=24)
+	ip_range = IP_Range(mask_start=29, mask_end=16)
 	ge = ip_range.merge_network_address(start_ip)
 	while IP(start_ip).int() < IP(stop_ip).int():
 		try:
