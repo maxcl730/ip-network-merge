@@ -43,7 +43,7 @@ class IPAddrInfo():
 
 	@classmethod
 	def from_aliyun(cls, ip_address):
-		sleeptime = random.randint(2,3) + random.randint(3,8)/10
+		sleeptime = random.randint(3,5) + random.randint(3,8)/10
 		print("Sleep {}s".format(sleeptime))
 		time.sleep(sleeptime)
 		url = 'http://ip.aliyun.com/service/getIpInfo.php?ip=' + ip_address
@@ -78,9 +78,10 @@ class IP_Range(object):
 	def lookup_ipaddress_info(self, ip_address):
 		print("Querying ip address for {}".format(ip_address))
 		#return str(random.randint(10,10))
-
-		#info = IPAddrInfo.from_baidu(ip_address)
-		info = IPAddrInfo.from_aliyun(ip_address)
+		info = False
+		while not info:
+			#info = IPAddrInfo.from_baidu(ip_address)
+			info = IPAddrInfo.from_aliyun(ip_address)
 		#pprint(info)
 		return info
 
