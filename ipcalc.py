@@ -77,6 +77,14 @@ class IP_Range(object):
 
 	def lookup_ipaddress_info(self, ip_address):
 		print("Querying ip address for {}".format(ip_address))
+		"""
+		if ip_address.startswith('1.0.0'):
+			return str('IP address information AAA')
+		elif ip_address.startswith('1.0.17'):
+			return str('IP address information CCC')
+		elif ip_address.startswith('1.0.127'):
+			return str('IP address information DDD')
+		"""
 		#return str('IP address information')
 		info = False
 		while not info:
@@ -106,6 +114,7 @@ class IP_Range(object):
 		# print("{}, {}".format(ip_range.strNormal(3), next_ipaddr))
 		# 查询ip地址
 		ipaddr_info = {'ip_start': ip_range[1].strNormal(3),
+					   'network_address': ip_range[0].strNormal(3),
 					   'ip_range_int_start': ip_range[0].int(),
 					   'ip_range_int_end': ip_range[-1].int(),
 					   'ip_range': ip_range.strNormal(3),
@@ -129,12 +138,26 @@ class IP_Range(object):
 			for step in range(2**(mask_step-1), merge_steps):
 				#print("  {}".format(step))
 				next_ipaddr = ipaddr_info['next_ip']
-				next_ipaddr_info = self.lookup_ip_range_info(next_ipaddr, self.masks[0])
-				if ipaddr_info['info'] != next_ipaddr_info['info']:
-					# 查询结果不同则返回网段信息
+
+				print(next_ipaddr + " in " + megerd_ipaddr_info['network_address'] + '/' + str(self.masks[mask_step]))
+				if IP(megerd_ipaddr_info['network_address']).int() % 2**(32-self.masks[mask_step]) != 0:
+					# 如遇跨网段则返回，重新开始合并
+					print("AAAA")
 					yield megerd_ipaddr_info
 					raise StopIteration
-				ipaddr_info = next_ipaddr_info
+				if next_ipaddr in IP(megerd_ipaddr_info['network_address'] + '/' + str(self.masks[mask_step])):
+					next_ipaddr_info = self.lookup_ip_range_info(next_ipaddr, self.masks[0])
+					if ipaddr_info['info'] != next_ipaddr_info['info']:
+						# 查询结果不同则返回网段信息
+						print('BBBB')
+						yield megerd_ipaddr_info
+						raise StopIteration
+					ipaddr_info = next_ipaddr_info
+				else:
+					# 如遇跨网段则返回，重新开始合并
+					print('CCCC')
+					yield megerd_ipaddr_info
+					raise StopIteration
 			mask_step += 1
 			net_address = IP(ipaddr_info['ip_start']).make_net(self.masks[mask_step-1]).strNormal()
 			pprint("Merge IP range, New network address: {} , {}".format(net_address, self.masks[mask_step-1]))
@@ -142,7 +165,8 @@ class IP_Range(object):
 			megerd_ipaddr_info = ipaddr_info.copy()
 			#yield merge_steps
 			merge_steps = 2 ** mask_step
-		yield ipaddr_info
+		print('DDDD')
+		yield megerd_ipaddr_info
 
 
 if __name__ == '__main__':
