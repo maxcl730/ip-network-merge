@@ -1,4 +1,5 @@
 import sys
+import os
 import requests
 from pprint import pprint
 import time
@@ -75,7 +76,7 @@ class IP_Range(object):
 
 	def lookup_ipaddress_info(self, ip_address):
 		print("Querying ip address for {}".format(ip_address))
-		#return random.randint(10,10)
+		return str(random.randint(10,10))
 
 		#info = IPAddrInfo.from_baidu(ip_address)
 		info = IPAddrInfo.from_aliyun(ip_address)
@@ -99,25 +100,20 @@ class IP_Range(object):
 		net_address = ip.make_net(mask).strNormal()
 		ip_range = IP(net_address)
 		boardcast_address = ip_range[-1]
-		next_ipaddr = IP(boardcast_address.int()+1).strNormal(3)
+		next_ipaddr = IP(boardcast_address.int()+2).strNormal(3)
 		# print("{}, {}".format(ip_range.strNormal(3), next_ipaddr))
 		# 查询ip地址
+		ipaddr_info = {'ip_start': ip_range[1].strNormal(3),
+					   'ip_range_int_start': ip_range[0].int(),
+					   'ip_range_int_end': ip_range[-1].int(),
+					   'ip_range': ip_range.strNormal(3),
+					   'netmask': mask,
+					   'next_ip': next_ipaddr}
 		if info == None:
-			ipaddr_info = {'ip_start': ip_range[0].strNormal(3),
-						   'ip_range_int_start': ip_range[0].int(),
-						   'ip_range_int_end': ip_range[-1].int(),
-						   'ip_range': ip_range.strNormal(3),
-						   'info':  'PRIVATE' if ip.iptype() == 'PRIVATE' else self.lookup_ipaddress_info(ip_address),
-						   'netmask': mask,
-						   'next_ip': next_ipaddr}
+			ipaddr_info['info'] = 'PRIVATE' if ip.iptype() == 'PRIVATE' else self.lookup_ipaddress_info(ip_address)
 		else:
-			ipaddr_info = {'ip_start': ip_range[0].strNormal(3),
-						   'ip_range_int_start': ip_range[0].int(),
-						   'ip_range_int_end': ip_range[-1].int(),
-						   'ip_range': ip_range.strNormal(3),
-						   'info':  info,
-						   'netmask': mask,
-						   'next_ip': next_ipaddr}
+			ipaddr_info['info'] = info
+
 		return ipaddr_info
 
 
@@ -149,14 +145,23 @@ class IP_Range(object):
 
 if __name__ == '__main__':
 	start_ip = sys.argv[1]
-	ip_range = IP_Range(29, 24)
+	stop_ip = sys.argv[2]
+
+	fi = open('./iprange.txt', 'a+')
+	ip_range = IP_Range(mask_start=29, mask_end=24)
 	ge = ip_range.merge_network_address(start_ip)
-	try:
-		while True:
-			a1 = next(ge)
+	while IP(start_ip).int() < IP(stop_ip).int():
+		try:
+			while True:
+				a1 = next(ge)
+				start_ip = a1['next_ip']
+		except StopIteration:
 			pprint(a1)
-	except StopIteration:
-		print('end')
+			msg = a1['ip_range'] + ',' + str(a1['netmask']) + ',' + str(a1['ip_range_int_end']) + ',' + str(a1['ip_range_int_start']) + ',' + a1['info']
+			pprint(msg)
+			fi.write(msg + os.linesep)
+			fi.flush()
+			ge = ip_range.merge_network_address(start_ip)
 
 
 
