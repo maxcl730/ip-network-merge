@@ -4,6 +4,7 @@ import requests
 from pprint import pprint
 import time
 import random
+import datetime
 from IPy import IP
 #masks =  ["255.255.255.248", "255.255.255.240", "255.255.255.224", "255.255.255.192", "255.255.255.128", "255.255.255.0",
 #		  "255.255.248.0", "255.255.240.0", "255.255.224.0", "255.255.192.0", "255.255.128.0", "255.255.0.0", ]
@@ -57,7 +58,7 @@ class IPAddrInfo():
 			return False
 		r.encoding = 'utf-8'
 		result = r.json()
-		pprint(result)
+		#pprint(result)
 		if result['code'] != 0:
 			return False
 		data = result['data']
@@ -85,7 +86,7 @@ class IP_Range(object):
 		elif ip_address.startswith('1.0.127'):
 			return str('IP address information DDD')
 		"""
-		#return str('IP address information')
+		return str('IP address information')
 		info = False
 		while not info:
 			#info = IPAddrInfo.from_baidu(ip_address)
@@ -134,12 +135,12 @@ class IP_Range(object):
 		ipaddr_info = self.lookup_ip_range_info(start_ip, self.masks[0])
 		megerd_ipaddr_info = ipaddr_info.copy()
 		while mask_step < len(self.masks):
-			print("{}  {}".format(2**(mask_step-1), merge_steps))
+			#print("{}  {}".format(2**(mask_step-1), merge_steps))
 			for step in range(2**(mask_step-1), merge_steps):
 				#print("  {}".format(step))
 				next_ipaddr = ipaddr_info['next_ip']
 
-				print(next_ipaddr + " in " + megerd_ipaddr_info['network_address'] + '/' + str(self.masks[mask_step]))
+				#print(next_ipaddr + " in " + megerd_ipaddr_info['network_address'] + '/' + str(self.masks[mask_step]))
 				if IP(megerd_ipaddr_info['network_address']).int() % 2**(32-self.masks[mask_step]) != 0:
 					# 如遇跨网段则返回，重新开始合并
 					print("Network address is illegal, cannot continue merge!")
@@ -160,7 +161,7 @@ class IP_Range(object):
 					raise StopIteration
 			mask_step += 1
 			net_address = IP(ipaddr_info['ip_start']).make_net(self.masks[mask_step-1]).strNormal()
-			pprint("Merge IP range, New network address: {} , {}".format(net_address, self.masks[mask_step-1]))
+			print("Merge IP range, New network address: {} , {}".format(net_address, self.masks[mask_step-1]))
 			ipaddr_info = self.lookup_ip_range_info(ipaddr_info['ip_start'], self.masks[mask_step-1], info=ipaddr_info['info'])
 			megerd_ipaddr_info = ipaddr_info.copy()
 			#yield merge_steps
@@ -183,7 +184,7 @@ if __name__ == '__main__':
 				start_ip = a1['next_ip']
 		except StopIteration:
 			#pprint(a1)
-			msg = a1['ip_range'] + '\t' + str(a1['netmask']) + '\t' + str(a1['ip_range_int_end']) + '\t' + str(a1['ip_range_int_start']) + '\t' + a1['info']
+			msg = a1['ip_range'] + '\t' + str(a1['netmask']) + '\t' + str(a1['ip_range_int_start']) + '\t' + str(a1['ip_range_int_end']) + '\t' + a1['info'] + '\t' + datetime.date.today().strftime('%Y%m%d')
 			print(msg)
 			fi.write(msg + os.linesep)
 			fi.flush()
