@@ -161,7 +161,7 @@ class IP_Range(object):
 					raise StopIteration
 			mask_step += 1
 			net_address = IP(ipaddr_info['ip_start']).make_net(self.masks[mask_step-1]).strNormal()
-			print("Merge IP range, New network address: {} , {}".format(net_address, self.masks[mask_step-1]))
+			print("Merge IP range, New network address: {}".format(net_address))
 			ipaddr_info = self.lookup_ip_range_info(ipaddr_info['ip_start'], self.masks[mask_step-1], info=ipaddr_info['info'])
 			megerd_ipaddr_info = ipaddr_info.copy()
 			#yield merge_steps
