@@ -86,7 +86,7 @@ class IP_Range(object):
 		elif ip_address.startswith('1.0.127'):
 			return str('IP address information DDD')
 		"""
-		return str('IP address information')
+		#return str('IP address information')
 		info = False
 		while not info:
 			#info = IPAddrInfo.from_baidu(ip_address)
