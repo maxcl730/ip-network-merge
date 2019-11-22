@@ -175,7 +175,7 @@ if __name__ == '__main__':
 	stop_ip = sys.argv[2]
 
 	fi = open('./iprange.txt', 'a+')
-	ip_range = IP_Range(mask_start=64, mask_end=16)
+	ip_range = IP_Range(mask_start=26, mask_end=16)
 	ge = ip_range.merge_network_address(start_ip)
 	while IP(start_ip).int() < IP(stop_ip).int():
 		try:
