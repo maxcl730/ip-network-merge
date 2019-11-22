@@ -44,7 +44,7 @@ class IPAddrInfo():
 
 	@classmethod
 	def from_aliyun(cls, ip_address):
-		sleeptime = random.randint(1,2) + random.randint(3,8)/10
+		sleeptime = random.randint(11,19)/10
 		print("Sleep {}s".format(sleeptime))
 		time.sleep(sleeptime)
 		url = 'http://ip.aliyun.com/service/getIpInfo.php?ip=' + ip_address
